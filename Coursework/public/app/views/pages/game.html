@@ -1,0 +1,124 @@
+<div class="jumbotron text-center">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Adventure!</a>
+            </div>
+            <div class="btn-group" role="group" ng-init="selectedTab = 'game'">
+                <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'game'}" ng-click="game.showGame(); selectedTab = 'game'">Game</button>
+                <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'character'}" ng-click="game.showStats(); selectedTab = 'character'">Character</button>
+                <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'inventory'}" ng-click="game.showInv(); selectedTab = 'inventory'">Inventory</button>
+                <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'quests'}" ng-click="game.showQuests(); selectedTab = 'quests'">Quests</button>
+            </div>
+        </div>
+    </nav>
+</div>
+<div class="jumbotron text-center" ng-show="game.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading...</p>
+</div>
+
+<div class="jumbotron text-center" ng-show="game.play">
+    <h4>What would you like to do?</h4>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'explore'}" ng-click="game.Explore(); selectedTab = 'explore'">Explore the World</button>
+        <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'shop'}" ng-click="game.Shop(); selectedTab = 'shop'">Buy Items</button>
+        <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'blacksmith'}" ng-click="game.Create(); selectedTab = 'blacksmith'">Visit Blacksmith</button>
+        <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'village'}" ng-click="game.Village(); selectedTab = 'village'">Go into the Village</button>
+    </div>
+    <div class="jumbotron text-center" ng-show="game.explore">
+        <h5>Off on an Adventure</h5>
+    </div>
+
+    <div class="jumbotron text-center" ng-show="game.shop">
+        <h5>Purchase items below</h5>
+    </div>
+
+    <div class="jumbotron text-center" ng-show="game.create">
+        <h5>Forge items below</h5>
+    </div>
+
+    <div class="jumbotron text-center" ng-show="game.village">
+        <h5>Speak to the villagers</h5>
+    </div>
+</div>
+<div class="jumbotron text-center" ng-show="game.stats">
+    <h4>Character Information</h4>
+    <h5>Stats</h5>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col" align="center"></th>
+                <th scope="col" class="text-center">Level</th>
+                <th scope="col" class="text-center" colspan="2">Effect</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-toggle="tooltip" title="Increasing Constitution increases your health!">
+                <th scope="row">Constitution</th>
+                <td>{{ game.character.constitution }}</td>
+                <td colspan="2">{{ game.character.health }} Hitpoints</td>
+            </tr>
+            <tr data-toggle="tooltip" title="Increasing Strength increases your melee damage!">
+                <th scope="row">Strength</th>
+                <td>{{ game.character.strength }}</td>
+                <td colspan="2">{{ game.character.damage}} Melee Damage</td>
+            </tr>
+            <tr data-toggle="tooltip" title="Increasing Dexterity increases your chance to dodge attacks!">
+                <th scope="row">Dexterity</th>
+                <td>{{ game.character.dexterity }}</td>
+                <td>{{ game.character.dodge }}% Dodge Chance</td>
+            </tr>
+            <tr data-toggle="tooltip" title="Increasing Intelligence allows you to both cast more spells, cast higher level spells and deal more damage with spells!">
+                <th scope="row">Intelligence</th>
+                <td>{{ game.character.intelligence }}</td>
+                <td colspan="2">{{ game.character.intelligence }} Magic Points, {{ game.character.magicDamage }} Bonus Damage</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="jumbotron text-center" ng-show="game.invent">
+    <h4>Inventory</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col" align="center">Item</th>
+                <th scope="col" class="text-center">Quantity</th>
+                <th scope="col" class="text-center" colspan="2">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="item in game.inventory">
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.description }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="jumbotron text-center" ng-show="game.quests">
+    <h4>Quests</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col" align="center">Name</th>
+                <th scope="col" class="text-center">Status</th>
+                <th scope="col" class="text-center" colspan="2">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="quest in game.quests">
+                <td>{{ quest.name }}</td>
+                <td>{{ quest.status }}</td>
+                <td>{{ quest.description }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="jumbotron text-center" ng-show="game.tutorial">
+    <h4>Tutorial</h4>
+    <p> Blah Blah!</p>
+</div>

@@ -1,0 +1,50 @@
+<div class="page-header">
+    <h1>
+        Items
+        <a href="/items/create" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus"></span>
+            New Item
+        </a>
+        <!--<a href="#" ng-click="item.deleteItem(item._id)" class="btn btn-primary">Delete</a>-->
+    </h1>
+</div>
+<!-- LOADING MESSAGE -->
+<div class="jumbotron text-center" ng-show="item.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading Items...</p>
+</div>
+<table class="table table-bordered table-striped" ng-show="item.items">
+    <thead>
+        <tr>
+            <th>Item ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Slot</th>
+            <th>Constitution Bonus</th>
+            <th>Strength Bonus</th>
+            <th>Dexterity Bonus</th>
+            <th>Intelligence Bonus</th>
+            <th>Health Restore</th>
+            <th class="col-sm-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- LOOP OVER THE ITEMS -->
+        <tr ng-repeat="item in item.items">
+            <td>{{ item._id }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.type }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ item.slot }}</td>
+            <td>{{ item.constitution }}</td>
+            <td>{{ item.strength }}</td>
+            <td>{{ item.dexterity }}</td>
+            <td>{{ item.intelligence }}</td>
+            <td>{{ item.health }}</td>
+            <td class="col-sm-2">
+                <a ng-href="/items/{{ item._id }}" class="btn btn-danger">Edit</a>
+            </td>
+        </tr>
+    </tbody>
+</table> 

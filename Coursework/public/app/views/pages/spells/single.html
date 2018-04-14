@@ -1,0 +1,91 @@
+<div class="page-header">
+    <h1 ng-if="spell.type == 'create'">Create Spell</h1>
+    <h1 ng-if="spell.type == 'edit'">Edit Spell</h1>
+</div>
+<form class="form-horizontal" ng-submit="spell.saveSpell()">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Spell Type</label>
+        <select class="col-sm-4 form-control" style="margin-left: 15px; width: 29%;" ng-model="spell.spellData.type">
+            <option>Damage</option>
+            <option>Healing</option>
+            <option>Buff</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Cost</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.cost">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Level</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.level">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Description</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.description">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Constitution</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.constitution">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Strength</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.strength">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Dexterity</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.dexterity">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Intelligence</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.intelligence">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Health Restore</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.health">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Spell Damage</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="spell.spellData.damage">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-4">
+            <button type="submit" class="btn btn-success btn-lg btn-block" ng-if="spell.type == 'create'">
+                Create Spell
+            </button>
+            <button type="submit" class="btn btn-success btn-lg btn-block" ng-if="spell.type == 'edit'">
+                Update Spell
+            </button>
+        </div>
+    </div>
+</form>
+<div class="row show-hide-message" ng-show="spell.message">
+    <div class="col-sm-4 col-sm-offset-2">
+        <div class="alert alert-info">
+            {{ spell.message }}
+        </div>
+    </div>
+</div>

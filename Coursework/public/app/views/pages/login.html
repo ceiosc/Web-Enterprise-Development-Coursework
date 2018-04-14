@@ -1,0 +1,62 @@
+<div class="row col-sm-6 col-sm-offset-3" ng-init="login.initialiseLoginPage()">
+    <div class="jumbotron" ng-show="login.welcome">
+        <h1>Welcome!</h1>
+        <button type="submit" ng-click="login.showCreate()" class="btn btn-block btn-primary">
+            <span>Create Account</span>
+        </button>
+        <button type="submit" ng-click="login.showLogin()" class="btn btn-block btn-primary">
+            <span>Login</span>
+        </button>
+    </div>
+    <div class="jumbotron" ng-show="login.existing">
+        <h1>Login</h1>
+        <form ng-submit="login.doLogin()">
+            <!-- USERNAME INPUT -->
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" ng-model="login.loginData.username">
+            </div>
+            <!-- PASSWORD INPUT -->
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" ng-model="login.loginData.password">
+            </div>
+            <div class="alert alert-danger" ng-if="login.error">
+                {{ login.error }}
+            </div>
+            <!-- LOGIN BUTTON -->
+            <button type="submit" class="btn btn-block btn-primary">
+                <span>Login</span>
+                <span ng-if="login.processing" class="spinner">
+                    <span class="glyphicon glyphicon n-repeat"></span>
+                </span> 
+            </button>
+        </form>
+        <button type="submit" ng-click="login.hideLogin()" class="btn btn-block btn-secondary">
+            <span>Back</span>
+        </button>
+    </div>
+    <div class="jumbotron" ng-show="login.create">
+        <h1>Create Account</h1>
+        <form ng-submit="login.saveUser()">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control" ng-model="login.userData.name">
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" ng-model="login.userData.username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" ng-model="login.userData.password">
+            </div>
+            <button type="submit" class="btn btn-success btn-lg btn-block">
+                <span>Create User</span>
+            </button>
+        </form>
+        <button type="submit" ng-click="login.hideCreate()" class="btn btn-block btn-secondary">
+            <span>Back</span>
+        </button>
+    </div>
+</div> 

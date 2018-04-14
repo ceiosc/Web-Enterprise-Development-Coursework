@@ -1,0 +1,58 @@
+<div class="page-header">
+    <h1>
+        Spells
+        <a href="/spells/create" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus"></span>
+            New Spell
+        </a>
+        <!---->
+    </h1>
+</div>
+<!-- LOADING MESSAGE -->
+<div class="jumbotron text-center" ng-show="spell.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading Items...</p>
+</div>
+<table class="table table-bordered table-striped" ng-show="spell.spells">
+    <thead>
+        <tr>
+            <th>Spell ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cost</th>
+            <th>Level</th>
+            <th>Description</th>
+            <th>Constitution Bonus</th>
+            <th>Strength Bonus</th>
+            <th>Dexterity Bonus</th>
+            <th>Intelligence Bonus</th>
+            <th>Health Restore</th>
+            <th>Spell Damage</th>
+            <th class="col-sm-2"></th>
+            <th class="col-sm-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- LOOP OVER THE ITEMS -->
+        <tr ng-repeat="spell in spell.spells">
+            <td>{{ spell._id }}</td>
+            <td>{{ spell.name }}</td>
+            <td>{{ spell.type }}</td>
+            <td>{{ spell.cost }}</td>
+            <td>{{ spell.level }}</td>
+            <td>{{ spell.description }}</td>
+            <td>{{ spell.constitution }}</td>
+            <td>{{ spell.strength }}</td>
+            <td>{{ spell.dexterity }}</td>
+            <td>{{ spell.intelligence }}</td>
+            <td>{{ spell.health }}</td>
+            <td>{{ spell.damage }}</td>
+            <td class="col-sm-2">
+                <a ng-href="/spells/{{ spell._id }}" class="btn btn-danger">Edit</a>
+            </td>
+            <td>
+                <a href="#" ng-click="spell.deleteSpell(spell._id)" class="btn btn-primary">Delete</a>
+            </td>
+        </tr>
+    </tbody>
+</table> 

@@ -1,0 +1,48 @@
+<div class="page-header">
+    <h1>
+        Creature
+        <a href="/creatures/create" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus"></span>
+            New Creature
+        </a>
+        <!--<a href="#" ng-click="creature.deleteCreature(creature._id)" class="btn btn-primary">Delete</a>-->
+    </h1>
+</div>
+<!-- LOADING MESSAGE -->
+<div class="jumbotron text-center" ng-show="creature.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading Creatures...</p>
+</div>
+<table class="table table-bordered table-striped" ng-show="creature.creatures">
+    <thead>
+        <tr>
+            <th>Creature ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Constitution</th>
+            <th>Strength</th>
+            <th>Dexterity</th>
+            <th>Intelligence</th>
+            <th>Growth Rate</th>
+            <th>Difficulty</th>
+            <th class="col-sm-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- LOOP OVER THE CREATURES -->
+        <tr ng-repeat="creature in creature.creatures">
+            <td>{{ creature._id }}</td>
+            <td>{{ creature.name }}</td>
+            <td>{{ creature.description }}</td>
+            <td>{{ creature.constitution }}</td>
+            <td>{{ creature.strength }}</td>
+            <td>{{ creature.dexterity }}</td>
+            <td>{{ creature.intelligence }}</td>
+            <td>{{ creature.growth }}</td>
+            <td>{{ creature.difficulty }}</td>
+            <td class="col-sm-2">
+                <a ng-href="/creatures/{{ creature._id }}" class="btn btn-danger">Edit</a>
+            </td>
+        </tr>
+    </tbody>
+</table> 
