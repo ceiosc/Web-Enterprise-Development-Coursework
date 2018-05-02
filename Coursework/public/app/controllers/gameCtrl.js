@@ -38,42 +38,42 @@ angular.module('gameCtrl', ['gameService'])
                                         //Sword Item Data
                                         var sword = {
                                             characterID: data3._id,
-                                            itemID: "5ad1f54e5490ff6410496dc9",
+                                            itemID: "5ae9dfa8734d1d70892b896f",
                                             quantity: 1
                                         };
 
                                         //Shield Item Data
                                         var shield = {
                                             characterID: data3._id,
-                                            itemID: "5ad1f5c25490ff6410496dca",
+                                            itemID: "5ae9dfb2734d1d70892b8975",
                                             quantity: 1
                                         }
 
                                         //Chest Item Data
                                         var chest = {
                                             characterID: data3._id,
-                                            itemID: "5ad1f6b29b28037413781d97",
+                                            itemID: "5ae9dfc0734d1d70892b898e",
                                             quantity: 1
                                         }
 
                                         //Legs Item Data
                                         var legs = {
                                             characterID: data3._id,
-                                            itemID: "5ad1f6c29b28037413781d98",
+                                            itemID: "5ae9dfc6734d1d70892b89c6",
                                             quantity: 1
                                         }
 
                                         //Boots Item Data
                                         var boots = {
                                             characterID: data3._id,
-                                            itemID: "5ad1f6f89b28037413781d99",
+                                            itemID: "5ae9dfcc734d1d70892b89cc",
                                             quantity: 1
                                         }
 
                                         //Sword Item Data
                                         var head = {
                                             characterID: data3._id,
-                                            itemID: "5ad1f64e9b28037413781d96",
+                                            itemID: "5ae9dfb9734d1d70892b8978",
                                             quantity: 1
                                         }
 
@@ -87,6 +87,7 @@ angular.module('gameCtrl', ['gameService'])
 
                                         vm.setupCharacter();
                                         vm.getInventory();
+										vm.wait(10000);
                                         $window.location.reload();
                                         
                                     });
@@ -575,7 +576,7 @@ angular.module('gameCtrl', ['gameService'])
             if (item.price <= vm.character.gold) {
                 var newItem = {
                     characterID: vm.character._id,
-                    itemID: item.itemID,
+                    itemID: item.item,
                     quantity: 1
                 };
 
@@ -587,10 +588,12 @@ angular.module('gameCtrl', ['gameService'])
                     .success(function (data) {
                         Inventory.add(newItem)
                             .success(function (data) {
-                                vm.message = "Item Bought";
-                                vm.getCharacterDetails();
                             });
                     });
+					
+				vm.wait(5000);	
+                vm.message = "Item Bought";
+                vm.getCharacterDetails();
 
             } else {
                 vm.message = "Cannot Afford Item";
@@ -636,21 +639,32 @@ angular.module('gameCtrl', ['gameService'])
                 vm.shopStock = null;
                 vm.shopStock = [];
                 vm.getCharacterDetails();
+				vm.allItems = null;
+				vm.allItems = [];				
+						
+				Item.all()
+					.success(function(data){
+						vm.allItems = data;
+					});
+				
+				
                 Shop.get(villager.name)
                     .success(function (shopData) {
                         // when all the shops come back, remove the processing variable
                         vm.processing = false;
 
+						// when all the shops come back, remove the processing variable
+                        vm.processing = false;	
+
+						vm.shopStock = shopData;					
+
                         for (var i = 0; i < shopData.length; i++) {
-                            Item.get(shopData[i].item)
-                                .success(function (itemData) {
-                                    vm.shopStock.push({
-                                        item: itemData.name,
-                                        itemID: itemData._id,
-                                        price: shopData[vm.shopStock.length].price,
-                                        description: itemData.description
-                                    });
-                                });
+                            for(var j = 0; j < vm.allItems.length; j++){
+								if (vm.allItems[j]._id == shopData[i].item){
+									vm.shopStock[i].description = vm.allItems[j].description;
+									vm.shopStock[i].name = vm.allItems[j].name;
+								}
+							}
                         };
                     });
                 vm.sellInv = null;

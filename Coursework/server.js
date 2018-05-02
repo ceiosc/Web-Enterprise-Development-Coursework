@@ -56,9 +56,9 @@ app.get('*', function(req, res) {
 // START THE SERVER
 // ====================================
 //app.listen(config.port);
-server.listen(8080);
+server.listen(process.env.PORT || 8080);
 
-console.log('Magic happens on port ' + config.port);
+//console.log('Magic happens on port ' + config.port);
 
 io.sockets.on('connection', function (socket) {
 

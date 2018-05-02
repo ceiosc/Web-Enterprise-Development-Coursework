@@ -299,12 +299,12 @@ module.exports = function (app, express) {
             char.bonusIntelligence = 0;
 
             //Equip starting gear to character
-            char.mainhand = "5ad1f54e5490ff6410496dc9"; // Wooden Sword
-            char.offhand = "5ad1f5c25490ff6410496dca"; //Wooden Shield
-            char.chest = "5ad1f6b29b28037413781d97"; //Leather Chest
-            char.legs = "5ad1f6c29b28037413781d98"; //Leather Chaps
-            char.boots = "5ad1f6f89b28037413781d99"; //Leather HBoots
-            char.head = "5ad1f64e9b28037413781d96"; //Leather Cap
+            char.mainhand = "5ae9dfa8734d1d70892b896f"; // Wooden Sword
+            char.offhand = "5ae9dfb2734d1d70892b8975"; //Wooden Shield
+            char.chest = "5ae9dfc0734d1d70892b898e"; //Leather Shirt
+            char.legs = "5ae9dfc6734d1d70892b89c6"; //Leather Chaps
+            char.boots = "5ae9dfcc734d1d70892b89cc"; //Leather Boots
+            char.head = "5ae9dfb9734d1d70892b8978"; //Leather Cap
             char.ring = null;
             char.amulet = null;
             
@@ -1105,7 +1105,7 @@ module.exports = function (app, express) {
                             },
                             function (err, items) {
 
-                                // set the new npc information if it exists in the request
+                                // set the new inventory item information if it exists in the request
                                 if (req.body.characterID) {
                                     inventory.characterID = req.body.characterID;
                                 }

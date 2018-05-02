@@ -26,7 +26,7 @@ angular.module('encounterCtrl', ['encounterService'])
                     // when all the encounters come back, remove the processing variable
                     vm.processing = false;
                     vm.encounters = []
-                    console.log(vm.creatures);
+					
                     for (var i = 0; i < encounterData.length; i++) {
                         var firstCreature;
                         var secondCreature;
@@ -181,7 +181,7 @@ angular.module('encounterCtrl', ['encounterService'])
         vm.saveEncounter = function() {
             vm.processing = true;
             vm.message = '';
-            console.log(vm.encounterData);
+			
             // call the encounterService function to update
             Encounter.update($routeParams.encounter_id, vm.encounterData)
                 .success(function(data) {
