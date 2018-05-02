@@ -18,6 +18,10 @@ var ItemSchema = new Schema({
         type: String,
         required: true
     },
+    sellPrice: {
+        type: Number,
+        required: true
+    },
     slot: {
         type: String,
         required: false

@@ -1,7 +1,9 @@
 angular.module('mainCtrl', [])
-    .controller('mainController', function ($rootScope, $scope, $location, Auth, User) {
+    .controller('mainController', function ($rootScope, $scope, $location, $window, Auth, User) {
         var vm = this;
-        
+
+        vm.admin;
+
         // get info if a person is logged in
         vm.loggedIn = Auth.isLoggedIn();
         // check to see if a user is logged in on every request
@@ -11,8 +13,14 @@ angular.module('mainCtrl', [])
             Auth.getUser()
                 .then(function (data) {
                     vm.user = data.data;
+                    if (vm.user.role == 'Dungeon Master') {
+                        vm.admin = true;
+                    } else {
+                        vm.admin = false;
+                    }
                 });
         });
+        
         //Initial Setup on page load
         vm.initialiseLoginPage = function () {
             vm.create = false;
@@ -68,6 +76,8 @@ angular.module('mainCtrl', [])
                     if (data.data.success) {//Get authorised users id
                         Auth.getUser().success(function (user) {
                             console.log("Auth");
+                            vm.userid = user.id;
+                            $window.location.reload();
                             $location.path('/game/' + user.id);
                         });
                     }
@@ -107,6 +117,14 @@ angular.module('mainCtrl', [])
                     vm.create = false;
                 });
         };
+
+        vm.showChat = function () {
+            vm.chat = true;
+        };
+
+        vm.hideChat = function () {
+            vm.chat = false;
+        }
 
 
     });

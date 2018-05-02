@@ -22,6 +22,9 @@
     <script src="app/controllers/itemCtrl.js"></script>
     <script src="app/controllers/creatureCtrl.js"></script>
     <script src="app/controllers/spellCtrl.js"></script>
+    <script src="app/controllers/npcCtrl.js"></script>
+    <script src="app/controllers/shopCtrl.js"></script>
+    <script src="app/controllers/encounterCtrl.js"></script>
     <!-- services -->
     <script src="app/services/authService.js"></script>
     <script src="app/services/userService.js"></script>
@@ -29,9 +32,110 @@
     <script src="app/services/itemService.js"></script>
     <script src="app/services/creatureService.js"></script>
     <script src="app/services/spellService.js"></script>
+    <script src="app/services/npcService.js"></script>
+    <script src="app/services/shopService.js"></script>
+    <script src="app/services/inventService.js"></script>
+    <script src="app/services/levelService.js"></script>
+    <script src="app/services/encounterService.js"></script>    
     <!-- main Angular app files -->
     <script src="app/app.routes.js"></script>
     <script src="app/app.js"></script>
+    <!--jQuery-->
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <!--Sockets-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        jQuery(function ($) {
+            var socket = io.connect();
+            var $messageForm = $('#send-message');
+            var $messageBox = $('#message');
+            var $colorBox = $('#color');
+            var $chat = $('#chat');
+            var $users = $('#users');
+            var $loginName = $('#loginName');
+            var $joinChat = $('#joinBtn');
+            var $btnLogout = $('#btnLogout');
+            var $hideChat = $('#hideBtn');
+            var $showChat = $('#showBtn');
+            var $showUsers = $('#btnShowUsers');
+            var $hideUsers = $('#btnHideUsers');
+
+
+            $messageForm.submit(function (e) {
+                e.preventDefault();
+                socket.emit('send message', $messageBox.val(), $colorBox.val());
+                $messageBox.val('');
+            });
+
+            $joinChat.click(function () {
+                socket.emit('new user', $loginName.text(), function (data) {
+                    if (data) {
+                        $joinChat.hide();
+                        $showUsers.show();
+                        $('#chatWrap').show();
+                        $('#color option').each(function () {
+                            $(this).css("background-color", $(this).val());
+                            $('#color').css("background-color", $('#color').find(":selected").val());
+                        })
+                        $hideChat.show();
+                    }
+                });
+            })
+
+            $colorBox.change(function () {
+                $('#color').css("background-color", $('#color').find(":selected").val());
+            })
+
+            socket.on('new message', function (data) {
+                $chat.append('<strong style="color:' + data.color + '">' + data.nick + '</strong>: ' + data.msg + "<br />");
+            });
+
+            $btnLogout.click(function () {
+                socket.disconnect();
+                $joinChat.show();
+                $hideChat.hide();
+                $('#chatWrap').hide();
+            })
+
+            $showChat.click(function () {
+                $hideChat.show();
+                $showChat.hide();
+                $showUsers.show();
+                $('#chatWrap').show();
+
+            });
+
+            $hideChat.click(function () {
+                $hideChat.hide();
+                $showChat.show();
+                $showUsers.hide();
+                $hideUsers.hide();
+                $users.hide();
+                $('#chatWrap').hide();
+
+            });
+
+            $showUsers.click(function () {
+                $showUsers.hide();
+                $hideUsers.show();
+                $users.show();
+            })
+
+            $hideUsers.click(function () {
+                $showUsers.show();
+                $hideUsers.hide();
+                $users.hide();
+            })
+
+            socket.on('usernames', function (data) {
+                var html = '';
+                for (i = 0; i < data.length; i++) {
+                    html += '<p>' + data[i] + '</p>';
+                    $users.html(html);                    
+                }
+            });
+        });
+    </script>
 </head>
 <body ng-app="userApp" ng-controller="mainController as main">
     <!-- NAVBAR -->
@@ -39,11 +143,11 @@
         <div class="navbar navbar-inverse" ng-if="main.loggedIn">
             <div class="container">
                 <div class="navbar-header">
-                    <a href="/game" class="navbar-brand">
+                    <a ng-click="main.initialiseLoginPage()" class="navbar-brand">
                         <span class="glyphicon glyphicon-fire text-danger"></span> Adventure!
                     </a>
                 </div>
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav" ng-if="main.admin">
                     <li>
                         <a href="/users">
                             <span class="glyphicon glyphicon-user"></span>
@@ -68,15 +172,33 @@
                             Spells
                         </a>
                     </li>
+                    <li>
+                        <a href="/npcs">
+                            <span class="glyphicon glyphicon-eye-open"></span>
+                            Npcs
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/shops">
+                            <span class="glyphicon glyphicon-usd"></span>
+                            Shops
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/encounters">
+                            <span class="glyphicon glyphicon-screenshot text-info"></span>
+                            Encounters
+                        </a>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li ng-if="!main.loggedIn"><a href="/login">Login</a></li>
+                    <li ng-if="!main.loggedIn" id="loginBtn"><a href="/login">Login</a></li>
                     <li ng-if="main.loggedIn" class="navbar-text">
                         Hello
-                        {{ main.user.username }}!
+                        <label id="loginName">{{main.user.username}}</label>!
                     </li>
                     <li ng-if="main.loggedIn">
-                        <a href="#" ng-click="main.doLogout()">Logout</a>
+                        <a id="btnLogout" href="#" ng-click="main.doLogout()">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -84,7 +206,56 @@
     </header>
     <main class="container">
         <!-- ANGULAR VIEWS -->
-        <div ng-view></div>
+        <div ng-view class="col-sm-10"></div>     
+        <div id="contentWrap" ng-if="main.loggedIn"  class="col-sm-2">
+            <!--Buttons-->
+            <input type="submit" class="btn btn-success" id="joinBtn" value="Join Chat" />
+            <input type="submit" class="btn btn-success" id="showBtn" value="Show Chat" />
+            <input type="submit" class="btn btn-success" id="hideBtn" value="Hide Chat" />
+
+            <!--Modal-->
+            <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModal" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="userModalTitle">List of Active Users</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Chat Box-->
+            <div id="chatWrap">
+                <div id="chat"></div>
+                <form id="send-message">
+                    <select id="color">
+                        <option value="black" style="color: black"></option>
+                        <option value="red" style="color: red"> </option>
+                        <option value="blue" style="color: blue"> </option>
+                        <option value="green" style="color: green"> </option>
+                        <option value="hotpink" style="color: hotpink"> </option>
+                        <option value="purple" style="color: purple"> </option>
+                        <option value="deepskyblue" style="color: deepskyblue"> </option>
+                        <option value="brown" style="color: brown"></option>
+                        <option value="gold" style="color: gold"> </option>
+                        <option value="darkorange" style="color: darkorange"> </option>
+                    </select>
+                    <input id="message" type="text" />
+                    <input type="submit" class="btn btn-success" />
+                </form>
+            </div>
+            <input type="button" class="btn btn-info" value="Show Users" id="btnShowUsers" />
+            <input type="button" class="btn btn-info" value="Hide Users" id="btnHideUsers" />
+            <div id="users"></div>
+        </div>
     </main>
 </body>
 </html>

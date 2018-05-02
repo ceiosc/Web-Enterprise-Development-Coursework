@@ -1,0 +1,525 @@
+<div class="text-center" ng-init="game.getCharacterDetails()">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Adventure!</a>
+            </div>
+            <div class="btn-group" role="group" ng-init="selectedTab = 'game'">
+                <button type="button" class="btn btn-success" ng-disabled="game.fightFinished" ng-class="{'active': selectedTab == 'game'}" ng-click="game.showGame(); selectedTab = 'game'">Game</button>
+                <button type="button" class="btn btn-success" ng-disabled="game.fightFinished" ng-class="{'active': selectedTab == 'character'}" ng-click="game.showStats(); selectedTab = 'character'">Character</button>
+                <button type="button" class="btn btn-success" ng-disabled="game.fightFinished" ng-class="{'active': selectedTab == 'inventory'}" ng-click="game.showInv(); selectedTab = 'inventory'">Inventory</button>
+                <button type="button" class="btn btn-success" ng-disabled="game.fightFinished" ng-class="{'active': selectedTab == 'leaderboard'}" ng-click="game.showLeaderboard(); selectedTab = 'leaderboard'">Leaderboard</button>
+            </div>
+        </div>
+    </nav>
+</div>
+<div class="jumbotron text-center" ng-show="game.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading...</p>
+</div>
+
+<div class="jumbotron text-center" ng-show="game.play">
+    <div class="container" ng-show="!game.explore">
+        <h4>What would you like to do?</h4>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-success" ng-click="game.Explore(); selectedTab = 'explore'">Explore the World</button>
+            <button type="button" class="btn btn-success" ng-disabled="game.explore"ng-class="{'active': selectedTab == 'village'}" ng-click="game.Village(); selectedTab = 'village'">Go into the Village</button>
+        </div>
+    </div>
+    <div class="text-center" ng-show="game.explore">
+        <div class="container" ng-show="!game.fightFinished">
+            <h4>You are under attack!</h4>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <label style="margin-right: 10px;">{{main.user.username}} </label>
+                            <span ng-if="game.fight.turn=='Player'" class="glyphicon glyphicon-arrow-left text-success turnIndicator"></span>
+                            <label ng-if="game.fight.turn=='Player'" class="text-success">Your Turn</label>
+                            <br />
+                            <label style="color: green; font-weight:bold">Health: ({{game.fight.player.CurHealth}}/{{game.fight.player.MaxHealth}})</label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.player.HealthBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.player.HealthBar}}%"></div>
+                            </div>
+                            <label style="color: dodgerblue; font-weight:bold">Magic Points: ({{game.fight.player.CurMana}}/{{game.fight.player.MaxMana}}) </label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.player.ManaBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.player.ManaBar}}%"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1 col-sm-offset-1">
+                            <button type="button" ng-if="(selectedTab=='Cast Spell' && game.fight.spell.type=='Healing')" ng-click="game.attackTarget('player', selectedTab); selectedTab==null" class="btn btn-primary">Select</button>
+                            <button type="button" ng-if="(selectedTab=='Use Item' && game.fight.item.type == 'Consumable') && (!game.fight.itemCooldown)" ng-click="game.useItem('player'); selectedTab==null" class="btn btn-info" >Select</button>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="col-sm-4 col-sm-offset-2">
+                    <div class="row">
+                        <div class="col-sm-1">
+                            <button type="button" ng-if="(selectedTab=='Attack') && game.fight.enemy1.CurHealth > 0" ng-click="game.attackTarget('enemy1', selectedTab); selectedTab==null" class="btn btn-success">Select</button>
+                            <button type="button" ng-if="(selectedTab=='Cast Spell' && game.fight.spell.type=='Damage') && game.fight.enemy1.CurHealth > 0" ng-click="game.attackTarget('enemy1', selectedTab); selectedTab==null" class="btn btn-primary">Select</button>
+                        </div>
+                        <div class="col-sm-8 col-sm-offset-1">
+                            <label>{{game.fight.enemy1.name}}</label>
+                            <span ng-if="game.fight.turn=='Enemy1'" class="glyphicon glyphicon-arrow-left text-success turnIndicator"></span>
+                            <label ng-if="game.fight.turn=='Player'" class="text-success">Enemy Turn</label>
+                            <span class="glyphicon glyphicon-search text-info" style="margin-left: 10px;" data-toggle="tooltip" title="Constitution: {{game.fight.enemy1.constitution}}&#013;Strength: {{game.fight.enemy1.strength}}&#013;Dexterity: {{game.fight.enemy1.dexterity}}&#013;Intelligence: {{game.fight.enemy1.intelligence}}"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11 col-sm-offset-1">
+                            <label style="color: green; font-weight:bold">Health: ({{game.fight.enemy1.CurHealth}}/{{game.fight.enemy1.MaxHealth}})</label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.enemy1.HealthBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.enemy1.HealthBar}}%"></div>
+                            </div>
+                            <label style="color: dodgerblue; font-weight:bold">Magic Points: ({{game.fight.enemy1.CurMana}}/{{game.fight.enemy1.MaxMana}}) </label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.enemy1.ManaBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.enemy1.ManaBar}}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-success" ng-class="{'active': selectedTab == 'Attack'}" ng-click="game.showGame(); selectedTab = 'Attack'" style="margin-right: 5px;">Attack</button>
+                        <button type="button" class="btn btn-primary" ng-class="{'active': selectedTab == 'Cast Spell'}" ng-click="game.selectSpell(); selectedTab = 'Cast Spell'" style="margin-right: 5px;">Cast Spell</button>
+                        <button type="button" class="btn btn-info" ng-class="{'active': selectedTab == 'Use Item'}" ng-click="game.selectItem(); selectedTab = 'Use Item'" style="margin-right: 5px;" data-toggle="tooltip" title="Caution! When you use an item you must wait a turn before using another!">Use Item</button>
+                        <button type="button" class="btn btn-danger" ng-click="game.RunAway()">Run Away!</button>
+                    </div>
+                    <div class="row" ng-if="selectedTab=='Cast Spell'">
+                        <div class="col-sm-3">
+                            <label>Select Spell:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <select class="form-control" ng-options="spell.name for spell in game.fight.castableSpells" ng-model="game.fight.spell">
+                                <option value="">-- Choose an option --</option>
+                            </select>
+                            <label ng-if="game.fight.spell">Mana Cost: {{game.fight.spell.cost}}</label>
+                            <label ng-if="game.fight.spell">Spell Description: {{game.fight.spell.description}}</label>
+                            <label ng-if="game.fight.spell">Bonus Magic Damage: {{game.character.magicDamage}}</label>
+                        </div>
+                    </div>
+                    <div class="row" ng-if="selectedTab=='Use Item'">
+                        <div class="col-sm-3">
+                            <label>Select Item:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <select class="form-control" ng-options="item.name for item in game.fight.useableItems" ng-model="game.fight.item">
+                                <option value="">-- Choose an option --</option>
+                            </select>
+                            <label ng-if="game.fight.item">Item Selected: {{game.fight.item.name}}</label>
+                            <label ng-if="game.fight.item">Item Description: {{game.fight.item.description}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-sm-offset-2">
+                    <div class="row">
+                        <div class="col-sm-1">
+                            <button type="button" ng-if="(selectedTab=='Attack') && game.fight.enemy2.CurHealth > 0" ng-click="game.attackTarget('enemy2', selectedTab); selectedTab==null" class="btn btn-success">Select</button>
+                            <button type="button" ng-if="(selectedTab=='Cast Spell' && game.fight.spell.type=='Damage') && game.fight.enemy2.CurHealth > 0" ng-click="game.attackTarget('enemy2', selectedTab); selectedTab==null" class="btn btn-primary">Select</button>
+                        </div>
+                        <div class="col-sm-8 col-sm-offset-1">
+                            <label>{{game.fight.enemy2.name}} </label>
+                            <span ng-if="game.fight.turn=='Enemy2'" class="glyphicon glyphicon-arrow-left text-success turnIndicator"></span>
+                            <label ng-if="game.fight.turn=='Player'" class="text-success">Enemy Turn</label>
+                            <span class="glyphicon glyphicon-search text-info" style="margin-left: 10px;" data-toggle="tooltip" title="Constitution: {{game.fight.enemy2.constitution}}&#013;Strength: {{game.fight.enemy2.strength}}&#013;Dexterity: {{game.fight.enemy2.dexterity}}&#013;Intelligence: {{game.fight.enemy2.intelligence}}"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11 col-sm-offset-1">
+                            <label style="color: green; font-weight:bold">Health: ({{game.fight.enemy2.CurHealth}}/{{game.fight.enemy2.MaxHealth}})</label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.enemy2.HealthBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.enemy2.HealthBar}}%"></div>
+                            </div>
+                            <label style="color: dodgerblue; font-weight:bold">Magic Points: ({{game.fight.enemy2.CurMana}}/{{game.fight.enemy2.MaxMana}}) </label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.enemy2.ManaBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.enemy2.ManaBar}}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div style="border:1px dotted black">
+                        <textarea disabled id="txtAreaInformation" class="form-control" rows="10"  style="max-height: 300px; cursor: default;">Battle Information Here:&#13;{{game.fight.information}}</textarea>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-sm-offset-2">
+                    <div class="row">
+                        <div class="col-sm-1">
+                            <button type="button" ng-if="(selectedTab=='Attack') && game.fight.enemy3.CurHealth > 0" ng-click="game.attackTarget('enemy3', selectedTab); selectedTab==null" class="btn btn-success">Select</button>
+                            <button type="button" ng-if="(selectedTab=='Cast Spell' && game.fight.spell.type=='Damage') && game.fight.enemy3.CurHealth > 0" ng-click="game.attackTarget('enemy3', selectedTab); selectedTab==null" class="btn btn-primary">Select</button>
+                        </div>
+                        <div class="col-sm-8 col-sm-offset-1">
+                            <label>{{game.fight.enemy3.name}} </label>
+                            <span ng-if="game.fight.turn=='Enemy3'" class="glyphicon glyphicon-arrow-left text-success turnIndicator"></span>
+                            <label ng-if="game.fight.turn=='Player'" class="text-success">Enemy Turn</label>
+                            <span class="glyphicon glyphicon-search text-info" style="margin-left: 10px;" data-toggle="tooltip" title="Constitution: {{game.fight.enemy3.constitution}}&#013;Strength: {{game.fight.enemy3.strength}}&#013;Dexterity: {{game.fight.enemy3.dexterity}}&#013;Intelligence: {{game.fight.enemy3.intelligence}}"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11 col-sm-offset-1">
+                            <label style="color: green; font-weight:bold">Health: ({{game.fight.enemy3.CurHealth}}/{{game.fight.enemy3.MaxHealth}})</label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.enemy3.HealthBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.enemy3.HealthBar}}%"></div>
+                            </div>
+                            <label style="color: dodgerblue; font-weight:bold">Magic Points: ({{game.fight.enemy3.CurMana}}/{{game.fight.enemy3.MaxMana}}) </label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{game.fight.enemy3.ManaBar}}" aria-valuemin="0" aria-valuemax="100" style="width: {{game.fight.enemy3.ManaBar}}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" ng-show="game.fightFinished">
+            <h4>You have {{game.fight.result}}!</h4>
+            <div class="container" ng-show="game.fight.result=='Won'">
+                <div class="row">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <label>You have found {{game.fight.rewards.gold}} gold! (Total Gold: {{game.character.gold}})  </label><br />
+                        <label>You have earned {{game.fight.rewards.exp}} experience! (Experience: {{game.character.experience}}/{{game.character.nextLevel}})</label>
+                        <div ng-if="game.fight.rewards.levelup">
+                            <label>You have reached level: {{game.character.level}}!</label>
+                            <label>You have been granted {{game.fight.rewards.levelPoints}} level up points</label>
+                            <label>You can spend these points to increase your stats by visiting the character tab!</label>
+                        </div>
+                        <label>You find the following items!</label>
+                        <div class="form-control" ng-repeat="reward in game.fight.rewards.items">
+                            <label>{{reward.name}}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container" ng-show="game.fight.result=='Lost'">
+                <div class="row">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <label>You have lost {{game.fight.rewards.gold}} gold... (Total Gold: {{game.character.gold}})</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <button type="submit" class="btn btn-success btn-lg btn-block" ng-click="game.finishFight()">
+                    Continue
+                </button>
+            </div>
+        </div>
+
+    </div> 
+    <div class="jumbotron text-center" ng-show="game.village">
+        <h5 ng-show="game.selectNpc">Select a villager below!</h5>
+        <div ng-repeat="villagers in game.villagers" class="row" ng-show="game.selectNpc">
+            <div ng-repeat="villager in villagers" class="col-md-4" style="margin-bottom: 5px;">
+                <button type="button" class="btn btn-primary" ng-click="game.talkTo(villager)">{{ villager.name }}</button>
+            </div>
+        </div>
+        <div ng-show="game.interactNpc">
+            <h4> {{ game.selectedVillager.name }}</h4>
+            <h6> "{{ game.selectedVillager.speech }}"</h6>
+            <div ng-repeat="option in game.villagerOptions" ng-if="!game.shopStock && !game.sellInv" class="row">
+                <button type="button" class="btn btn-primary" style="margin-bottom: 5px;" ng-click="game.selectOption(game.selectedVillager, option)">{{ option }}</button>
+            </div>
+            <div ng-show="game.shopStock">
+                <label align="right">
+                    Gold: {{ game.character.gold }}
+                </label>
+                <div class="row show-hide-message" ng-show="game.message">
+                    <div class="col-sm-8 col-sm-offset-2">
+                        <div class="alert alert-info">
+                            {{ game.message }}
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Price</th>
+                            <th>Description</th>
+                            <th class="col-sm-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- LOOP OVER THE ITEMS -->
+                        <tr ng-repeat="item in game.shopStock | orderBy: 'price'">
+                            <td>{{ item.item}}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.description }}</td>
+                            <td>
+                                <a class="btn btn-primary" ng-click="game.buyItem(item)">Buy</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div> 
+            <div ng-show="game.sellInv">
+                <label align="right">
+                    Gold: {{ game.character.gold }}
+                </label>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center">Item</th>
+                            <th scope="col" class="text-center">Quantity</th>
+                            <th scope="col" class="text-center">Sell Price</th>
+                            <th scope="col" class="text-center">Description</th>
+                            <th class="col-sm-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in game.inventory"  ng-if="item.equipped? item.quantity-1:item.quantity > 0">
+                            <td>{{ item.itemName }}</td>
+                            <td>{{ item.equipped? item.quantity-1:item.quantity }}</td>
+                            <td>{{ item.sellPrice }}</td>
+                            <td>{{ item.itemDescription }}</td>
+                            <td>
+                                <a class="btn btn-warning" ng-click="game.sellItem(item)">Sell</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-danger" ng-click="game.leaveShop()" ng-if="game.shopStock">Cancel</button>
+            <button type="button" class="btn btn-danger" ng-click="game.unselectVillager()" ng-if="!game.shopStock">Cancel</button>
+        </div>
+    </div>
+</div>
+<div class="jumbotron text-center" ng-show="game.stats">
+    <h4>Character Information</h4>
+    <h5>Stats</h5>
+    <h6 ng-toggle="tooltip" title="Experience is gained from fighting creatures">Level: {{game.character.level}} (Experience: {{game.character.experience}}/{{game.character.nextLevel}})</h6>
+    <h6 ng-toggle="tooltip" title="2 Gained when you level up, these can be used to increase your base stats!">Level-Up Points: {{game.character.levelUpPoints}}</h6>
+
+    <div class="row show-hide-message" ng-show="game.message">
+        <div class="col-sm-8 col-sm-offset-2">
+            <div class="alert alert-info">
+                {{ game.message }}
+            </div>
+        </div>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col" class="text-center">Attribute</th>
+                <th scope="col" class="text-center">Level</th>
+                <th scope="col" class="text-center" ng-show="game.character.levelUpPoints>0">Level Up!</th>
+                <th scope="col" class="text-center">Equipment Bonus</th>
+                <th scope="col" class="text-center">Effect</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-toggle="tooltip" title="Increasing Constitution increases your health!">
+                <th class="text-center" scope="row">Constitution</th>
+                <td>
+                    {{ game.character.baseConstitution }}
+                </td>
+                <td ng-show="game.character.levelUpPoints>0">
+                    <button type="button" class="btn btn-success" ng-click="game.levelStat('Constitution')" >Level Up!</button>
+                </td>
+                <td>
+                    <label ng-if="game.character.bonusConstitution >= 0" style="color: green">(+{{ game.character.bonusConstitution }})</label>
+                    <label ng-if="game.character.bonusConstitution < 0" style="color: red">({{ game.character.bonusConstitution }})</label>
+                </td>
+                <td colspan="2">{{ game.character.health }} Hitpoints</td>
+            </tr>
+            <tr data-toggle="tooltip" title="Increasing Strength increases your melee damage!">
+                <th class="text-center" scope="row">Strength</th>
+                <td>
+                    {{ game.character.baseStrength }}
+                </td>
+                <td ng-show="game.character.levelUpPoints>0">
+                    <button type="button" class="btn btn-success" ng-click="game.levelStat('Strength')">Level Up!</button>
+                </td>
+                <td>
+                    <label ng-if="game.character.bonusStrength >= 0" style="color: green">(+{{ game.character.bonusStrength }})</label>
+                    <label ng-if="game.character.bonusStrength < 0" style="color: red">({{ game.character.bonusStrength }})</label>
+                </td>
+                <td colspan="2">{{ game.character.damage}} Melee Damage</td>
+            </tr>
+            <tr data-toggle="tooltip" title="Increasing Dexterity increases your chance to dodge attacks!">
+                <th class="text-center" scope="row">Dexterity</th>
+                <td>
+                    {{ game.character.baseDexterity }}
+                </td>
+                <td ng-show="game.character.levelUpPoints>0">
+                    <button type="button" class="btn btn-success" ng-click="game.levelStat('Dexterity')">Level Up!</button>
+                </td>
+                <td>
+                    <label ng-if="game.character.bonusDexterity >= 0" style="color: green">(+{{ game.character.bonusDexterity }})</label>
+                    <label ng-if="game.character.bonusDexterity < 0" style="color: red">({{ game.character.bonusDexterity }})</label>
+                </td>
+                <td>{{ game.character.dodge }}% Dodge Chance</td>
+            </tr>
+            <tr data-toggle="tooltip" title="Increasing Intelligence allows you to both cast more spells, cast higher level spells and deal more damage with spells!">
+                <th class="text-center" scope="row">Intelligence</th>
+                <td>
+                    {{ game.character.baseIntelligence }}
+                </td>
+                <td ng-show="game.character.levelUpPoints>0">
+                    <button type="button" class="btn btn-success" ng-click="game.levelStat('Intelligence')">Level Up!</button>
+                </td>
+                <td>
+                    <label ng-if="game.character.bonusIntelligence >= 0" style="color: green">(+{{ game.character.bonusIntelligence }})</label>
+                    <label ng-if="game.character.bonusIntelligence < 0" style="color: red">({{ game.character.bonusIntelligence }})</label>
+                </td>
+                <td colspan="2">{{ game.character.mana}} Mana, {{ game.character.magicDamage }} Bonus Damage</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5>Equipment</h5>
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <td data-toggle="tooltip"
+                    title="Constitution: {{game.equipment.amulet.constitution}}&#013;Strength: {{game.equipment.amulet.strength}}&#013;Dexterity: {{game.equipment.amulet.dexterity}}&#013;Intelligence: {{game.equipment.amulet.intelligence}}"
+                    ng-class="{'green-text': game.equipment.amulet}">
+                    Amulet Slot:<br />
+                    {{ game.character.amulet? game.equipment.amulet.name: 'Nothing'}}
+                </td>
+                <td data-toggle="tooltip"
+                    title="Constitution: {{game.equipment.head.constitution}}&#013;Strength: {{game.equipment.head.strength}}&#013;Dexterity: {{game.equipment.head.dexterity}}&#013;Intelligence: {{game.equipment.head.intelligence}}"
+                    ng-class="{'green-text': game.equipment.head}">
+                    Head Slot: <br />
+                    {{ game.character.head? game.equipment.head.name: 'Nothing'}}
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td data-toggle="tooltip" 
+                    title="Constitution: {{game.equipment.mainhand.constitution}}&#013;Strength: {{game.equipment.mainhand.strength}}&#013;Dexterity: {{game.equipment.mainhand.dexterity}}&#013;Intelligence: {{game.equipment.mainhand.intelligence}}"
+                    ng-class="{'green-text': game.equipment.mainhand}">
+                    Mainhand Slot:<br />
+                    {{ game.character.mainhand? game.equipment.mainhand.name: 'Nothing' }}
+                </td>
+                <td data-toggle="tooltip"
+                    title="Constitution: {{game.equipment.chest.constitution}}&#013;Strength: {{game.equipment.chest.strength}}&#013;Dexterity: {{game.equipment.chest.dexterity}}&#013;Intelligence: {{game.equipment.chest.intelligence}}"
+                    ng-class="{'green-text': game.equipment.chest}">
+                    Chest Slot: <br />
+                    {{ game.character.chest? game.equipment.chest.name: 'Nothing'}}
+                </td>
+                <td data-toggle="tooltip"
+                    title="Constitution: {{game.equipment.offhand.constitution}}&#013;Strength: {{game.equipment.offhand.strength}}&#013;Dexterity: {{game.equipment.offhand.dexterity}}&#013;Intelligence: {{game.equipment.offhand.intelligence}}"
+                    ng-class="{'green-text': game.equipment.offhand}">
+                    Offhand Slot: <br />
+                    {{ game.character.offhand? game.equipment.offhand.name: 'Nothing'}}
+                </td>
+            </tr>
+            <tr>
+                <td data-toggle="tooltip"
+                    title="Constitution: {{game.equipment.ring.constitution}}&#013;Strength: {{game.equipment.ring.strength}}&#013;Dexterity: {{game.equipment.ring.dexterity}}&#013;Intelligence: {{game.equipment.ring.intelligence}}"
+                    ng-class="{'green-text': game.equipment.ring}">
+                    Ring Slot:<br />
+                    {{ game.character.ring? game.equipment.ring.name: 'Nothing'}}
+                </td>
+                <td data-toggle="tooltip"
+                    title="Constitution: {{game.equipment.legs.constitution}}&#013;Strength: {{game.equipment.legs.strength}}&#013;Dexterity: {{game.equipment.legs.dexterity}}&#013;Intelligence: {{game.equipment.legs.intelligence}}"
+                    ng-class="{'green-text': game.equipment.legs}">
+                    Leg Slot: <br />
+                    {{ game.character.legs? game.equipment.legs.name: 'Nothing'}}
+                </td>
+                <td data-toggle="tooltip"
+                    title="Constitution: {{game.equipment.boots.constitution}}&#013;Strength: {{game.equipment.boots.strength}}&#013;Dexterity: {{game.equipment.boots.dexterity}}&#013;Intelligence: {{game.equipment.boots.intelligence}}"
+                    ng-class="{'green-text': game.equipment.boots}">
+                    Boot Slot: <br />
+                    {{ game.character.boots? game.equipment.boots.name: 'Nothing'}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="jumbotron text-center" ng-show="game.invent">
+    <h4>Inventory</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col" class="text-center">Item</th>
+                <th scope="col" class="text-center">Equip Slot</th>
+                <th scope="col" class="text-center">Quantity</th>
+                <th scope="col" class="text-center" colspan="2">Description</th>
+                <th scope="col" class="text-center" data-toggle="tooltip" title="Increasing Constitution increases your health!">Constitution Bonus</th>
+                <th scope="col" class="text-center" data-toggle="tooltip" title="Increasing Strength increases your melee damage!">Strength Bonus</th>
+                <th scope="col" class="text-center" data-toggle="tooltip" title="Increasing Dexterity increases your chance to dodge attacks!">Dexterity Bonus</th>
+                <th scope="col" class="text-center" data-toggle="tooltip" title="Increasing Intelligence allows you to both cast more spells, cast higher level spells and deal more damage with spells!">Intelligence Bonus</th>
+                <th scope="col" class="text-center" data-toggle="tooltip" title="Equipment with Health restoration will heal you for that much each turn! Consumable items will heal that much when used!">Health Restoration</th>
+                <th scope="col" class="text-center">Equip/Unequip</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="item in game.inventory | orderBy: 'slot'">
+                <td>
+                    {{ item.itemName }}
+                </td>
+                <td>
+                    {{ item.slot? item.slot:'N/A'}}
+                </td>
+                <td>
+                    {{ item.quantity }}
+                </td>
+                <td colspan="2">
+                    {{ item.itemDescription }}
+                </td>
+                <td data-toggle="tooltip" title="Increasing Constitution increases your health!">
+                    {{item.constitution}}
+                </td>
+                <td data-toggle="tooltip" title="Increasing Strength increases your melee damage!">
+                    {{item.strength}}
+                </td>
+                <td data-toggle="tooltip" title="Increasing Dexterity increases your chance to dodge attacks!">
+                    {{item.dexterity}}
+                </td>
+                <td data-toggle="tooltip" title="Increasing Intelligence allows you to both cast more spells, cast higher level spells and deal more damage with spells!">
+                    {{item.intelligence}}
+                </td>
+                <td data-toggle="tooltip" title="Equipment with Health restoration will heal you for that much each turn! Consumable items will heal that much when used!">
+                    {{item.health>=0? item.health:'N/A'}}
+                </td>
+                <td ng-if="!item.equipped && item.type=='Equipment'">
+                    <button type="button" class="btn btn-success" ng-click="game.equip(item)">Equip</button>
+                </td>
+                <td ng-if="item.equipped && item.type=='Equipment'">
+                    <button type="button" class="btn btn-danger" ng-click="game.unequip(item, true)">Un-Equip</button>
+                </td>
+                <td ng-if="item.type!='Equipment'">
+                    Consumable
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="jumbotron text-center" ng-show="game.leaderboard">
+    <h4>Leaderboards</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col" class="text-center">Rank</th>
+                <th scope="col" class="text-center">Name</th>
+                <th scope="col" class="text-center">Level</th>
+                <th scope="col" class="text-center">Constitution</th>
+                <th scope="col" class="text-center">Strength</th>
+                <th scope="col" class="text-center">Dexterity</th>
+                <th scope="col" class="text-center">Intelligence</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="player in game.leaderboardRankings | orderBy: '-experience'">
+                <td>{{$index +1 }}</td>
+                <td>{{ player.name }}</td>
+                <td>{{ player.level }}</td>
+                <td>{{ player.constitution }}</td>
+                <td>{{ player.strength }}</td>
+                <td>{{ player.dexterity }}</td>
+                <td>{{ player.intelligence }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="jumbotron text-center" ng-show="game.tutorial">
+    <h4>Tutorial</h4>
+    <p> Blah Blah!</p>
+</div>

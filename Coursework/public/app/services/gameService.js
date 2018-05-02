@@ -9,6 +9,11 @@ angular.module('gameService', [])
             return $http.get('/api/game/' + userId);
         };
 
+        // get all characters
+        gameFactory.all = function () {
+            return $http.get('/api/game/');
+        };
+
         //Create Character
         gameFactory.createChar = function (userId) {
             return $http.post('/api/game/' + userId);
@@ -19,14 +24,9 @@ angular.module('gameService', [])
             return $http.put('/api/game/' + userId, characterData)
         };
 
-        //Get all inventory items
+        //Get equipped items
         gameFactory.getInv = function (charId) {
-            return $http.get('/api/game/inventory', charId);
-        };
-
-        //Add Item to Inventory
-        gameFactory.addInv = function (charId, itemId, quantity) {
-            return $http.post('/api/game/inventory', charId, itemId, quantity);
+            return $http.get('/api/game/equipped', charId);
         };
         
         //Start Quest

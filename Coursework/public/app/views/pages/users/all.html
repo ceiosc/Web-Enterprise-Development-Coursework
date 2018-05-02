@@ -19,7 +19,8 @@
             <th>_id</th>
             <th>Name</th>
             <th>Username</th>
-            <th class="col-sm-2"></th>
+            <th>Role</th>
+            <th class="col-sm-1"></th>
         </tr>
     </thead>
     <tbody>
@@ -28,7 +29,8 @@
             <td>{{ person._id }}</td>
             <td>{{ person.name }}</td>
             <td>{{ person.username }}</td>
-            <td class="col-sm-2">
+            <td>{{ person.role }}</td>
+            <td class="col-sm-1">
                 <a ng-href="/users/{{ person._id }}" class="btn btn-danger">Edit</a>
             </td>
         </tr>

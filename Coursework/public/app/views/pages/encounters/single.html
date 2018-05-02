@@ -1,0 +1,56 @@
+<div class="page-header">
+    <h1 ng-if="encounter.type == 'create'">Create Encounter</h1>
+    <h1 ng-if="encounter.type == 'edit'">Edit Encounter</h1>
+</div>
+<form class="form-horizontal" ng-submit="encounter.saveEncounter()">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">First Creature</label>
+        <select class="col-sm-4 form-control" style="margin-left: 15px; width: 29%;" ng-options="creature.name for creature in encounter.creatures" ng-model="encounter.encounterData.firstCreature">
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Second Creature</label>
+        <select class="col-sm-4 form-control" style="margin-left: 15px; width: 29%;" ng-options="creature.name for creature in encounter.creatures" ng-model="encounter.encounterData.secondCreature">
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Third Creature</label>
+        <select class="col-sm-4 form-control" style="margin-left: 15px; width: 29%;" ng-options="creature.name for creature in encounter.creatures" ng-model="encounter.encounterData.thirdCreature">
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Experience</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="encounter.encounterData.experience">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Minimum Level</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="encounter.encounterData.minimumLevel">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Maximum Level</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" ng-model="encounter.encounterData.maximumLevel">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-4">
+            <button type="submit" class="btn btn-success btn-lg btn-block" ng-if="encounter.type == 'create'">
+                Create Encounter
+            </button>
+            <button type="submit" class="btn btn-success btn-lg btn-block" ng-if="encounter.type == 'edit'"">
+                Update Encounter
+            </button>
+        </div>
+    </div>
+</form>
+<div class="row show-hide-message" ng-show="encounter.message">
+    <div class="col-sm-4 col-sm-offset-2">
+        <div class="alert alert-info">
+            {{ encounter.message }}
+        </div>
+    </div>
+</div>

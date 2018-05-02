@@ -7,12 +7,48 @@ header.navbar {
     border - radius :0;
 }
 
+/*
+    Chat System
+*/
+#chat {
+    width: 300px;
+    height: 500px;
+    background-color: aliceblue;
+    overflow-y: scroll;
+}
+
+#chatWrap{
+    float: left;
+    display:none;
+}
+
+#color{
+    width: 20px;
+    margin-right: 5px;
+}
+
+#hideBtn, #showBtn, #btnHideUsers, #btnShowUsers, #users {
+    display: none;
+}
+
+
+#message {
+    border: 1px #000000 solid;
+    width: 60%;
+    float: left;
+    margin-right: 5px;
+}
 /* ANIMATIONS
 ====================== */
 .spinner {
     animation: spin 1s infinite;
     -webkit-animation: spin 1s infinite;
     -moz-animation: spin 1s infinite;
+}
+
+.turnIndicator{
+    animation: blinker 1s linera infinite;
+    font-weight: bold;
 }
 
 .btn-group {
@@ -25,6 +61,11 @@ header.navbar {
     margin-right: 5px;
 }
 
+.green-text{
+    color: green;
+    font-weight: bold;
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -33,6 +74,10 @@ header.navbar {
     to {
         transform: rotate(360deg);
     }
+}
+
+@keyframes blinker{
+    50%{ opacity: 0.0; }
 }
 
 @-webkit-keyframes spin {

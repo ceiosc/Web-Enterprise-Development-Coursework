@@ -4,6 +4,11 @@ var Character = require('../models/character');
 var Item = require('../models/item');
 var Creature = require('../models/creature');
 var Spell = require('../models/spell');
+var Npc = require('../models/npc');
+var Shop = require('../models/shop');
+var Inventory = require('../models/inventory');
+var Level = require('../models/level');
+var Encounter = require('../models/encounter');
 var jwt = require('jsonwebtoken');
 var config = require('../../config');
 
@@ -14,38 +19,34 @@ module.exports = function (app, express) {
 
     var apiRouter = express.Router();
 
-    //*** CODE TO GENERATE FIRST SPELL IN A TABLE DURING DEVELOPMENT***
-    //route to generate sample spell 
+    //*** CODE TO GENERATE FIRST ENCOUNTER ITEM IN A TABLE, ONLY USED DURING DEVELOPMENT***
+    //route to generate sample npc 
     apiRouter.post('/sample', function (req, res) {
 
-        // look for a spell called fire blast.
-        Spell.findOne({
-            'name': 'Fire Blast'
-        }, function (err, spell) {
+        // look for the item called wooden sword
+        Encounter.findOne({
+            'firstCreature': '5ad20f37acb50a982684c6de',
+            'secondCreature': '5ad20f37acb50a982684c6de',
+            'thirdCreature': '5ad20f37acb50a982684c6de'
+        }, function (err, encounter) {
 
-            // if there is no spell called fire blast, create one
-            if (!spell) {
-                var sampleSpell = new Spell();
+            // if there is no item being sold with the id matching wooden sword
+            if (!encounter) {
+                var sampleEncounter = new Encounter();
 
-                sampleSpell.name = 'Fire Blast';
-                sampleSpell.type = 'Damage';
-                sampleSpell.cost = 2;
-                sampleSpell.level = 1;
-                sampleSpell.description = 'Deals 3 Damage to the enemy';
-                sampleSpell.constitution = 0;
-                sampleSpell.strength = 0;
-                sampleSpell.dexterity = 0;
-                sampleSpell.intelligence = 0;
-                sampleSpell.health = 0;
-                sampleSpell.damage = 3;
+                sampleEncounter.firstCreature = '5ad20f37acb50a982684c6de';
+                sampleEncounter.secondCreature = '5ad20f37acb50a982684c6de';
+                sampleEncounter.thirdCreature = '5ad20f37acb50a982684c6de';
+                sampleEncounter.experience = 50;
+                sampleEncounter.minimumLevel = 1;
+                sampleEncounter.maximumLevel = 5;
 
-                sampleSpell.save();
+                sampleEncounter.save();
             } else {
-                console.log(spell);
 
-                // if there is a fire blast spell, update it's damage value
-                spell.damage = 2;
-                spell.save();
+                // if there is a wooden sword in the shop, set it's price to 10'
+                inventory.itemName = 'Wooden Sword';
+                inventory.save();
             }
 
         });
@@ -62,6 +63,7 @@ module.exports = function (app, express) {
             user.name = req.body.name; // set the users name (comes from the request)
             user.username = req.body.username; // set the users username (comes from the request)
             user.password = req.body.password; // set the users password (comes from the request)
+            user.role = 'Player'; //Set the users access level (comes from the request)
 
             user.save(function (err) {
                 if (err) {
@@ -100,7 +102,7 @@ module.exports = function (app, express) {
         // find the user
         User.findOne({
             username: req.body.username
-        }).select('_id name username password').exec(function (err, user) {
+        }).select('_id name username password role').exec(function (err, user) {
 
             if (err) throw err;
 
@@ -126,7 +128,8 @@ module.exports = function (app, express) {
                     var token = jwt.sign({
                         id: user._id,
                         name: user.name,
-                        username: user.username
+                        username: user.username,
+                        role: user.role
                     }, superSecret, {
                             expiresIn: '24h' // expires in 24 hours
                         });
@@ -217,6 +220,7 @@ module.exports = function (app, express) {
                 if (req.body.name) user.name = req.body.name;
                 if (req.body.username) user.username = req.body.username;
                 if (req.body.password) user.password = req.body.password;
+                if (req.body.role) user.role = req.body.role;
 
                 // save the user
                 user.save(function (err) {
@@ -247,7 +251,20 @@ module.exports = function (app, express) {
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////*************GAME*************//////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-    
+
+    apiRouter.route('/game')
+
+    // get all the characters (accessed at GET http://localhost:8080/api/game)
+        .get(function (req, res) {
+
+        Character.find({}, function (err, characters) {
+            if (err) res.send(err);
+
+            // return the characters
+            res.json(characters);
+        });
+    });
+
     apiRouter.route('/game/:user_id')
         .get(function (req, res) {
             Character.findOne({
@@ -265,11 +282,32 @@ module.exports = function (app, express) {
             var char = new Character(); // create a new instance of the Character model
             char.userID = req.params.user_id; // set the userID (comes from request parameters)
             char.level = 1;
-            char.constitution = 1;
-            char.strength = 1;
-            char.dexterity = 1;
-            char.intelligence = 1;
+            char.levelUpPoints = 0;
+            char.experience = 0;
+            char.gold = 50;
 
+            //Set base stats
+            char.baseConstitution = 1;
+            char.baseStrength = 1;
+            char.baseDexterity = 1;
+            char.baseIntelligence = 1;
+
+            //Set bonus stats from gear assigned below
+            char.bonusConstitution = 2;
+            char.bonusStrength = 1;
+            char.bonusDexterity = 5;
+            char.bonusIntelligence = 0;
+
+            //Equip starting gear to character
+            char.mainhand = "5ad1f54e5490ff6410496dc9"; // Wooden Sword
+            char.offhand = "5ad1f5c25490ff6410496dca"; //Wooden Shield
+            char.chest = "5ad1f6b29b28037413781d97"; //Leather Chest
+            char.legs = "5ad1f6c29b28037413781d98"; //Leather Chaps
+            char.boots = "5ad1f6f89b28037413781d99"; //Leather HBoots
+            char.head = "5ad1f64e9b28037413781d96"; //Leather Cap
+            char.ring = null;
+            char.amulet = null;
+            
             char.save(function (err) {
                 if (err) {
                     // duplicate entry
@@ -288,12 +326,9 @@ module.exports = function (app, express) {
                 });
             });
         })
-
+        
         .put(function (req, res) {
-            Character.findOneAndUpdate({
-                'userID': req.params.user_id
-            }, function (err, character) {
-
+            Character.findById(req.params.user_id, function (err, character) {
                 if (err) {
                     res.send(err);
                 }
@@ -302,55 +337,94 @@ module.exports = function (app, express) {
                 if (req.body.level) {
                     character.level = req.body.level;
                 }
-                if (req.body.constitution) {
-                    character.constitution = req.body.constitution;
+                if (req.body.levelUpPoints || req.body.levelUpPoints === 0) {
+                    character.levelUpPoints = req.body.levelUpPoints;
                 }
-                if (req.body.strength) {
-                    character.strength = req.body.strength;
+                if (req.body.baseConstitution) {
+                    character.baseConstitution = req.body.baseConstitution;
                 }
-                if (req.body.dexterity){
-                    character.dexterity = req.body.dexterity;
+                if (req.body.baseStrength) {
+                    character.baseStrength = req.body.baseStrength;
                 }
-                if (req.body.intelligence) {
-                    character.intelligence = req.body.intelligence;
+                if (req.body.baseDexterity) {
+                    character.baseDexterity = req.body.baseDexterity;
+                }
+                if (req.body.baseIntelligence) {
+                    character.baseIntelligence = req.body.baseIntelligence;
+                }
+                if (req.body.bonusStrength || req.body.bonusStrength === 0 ) {
+                    character.bonusStrength = req.body.bonusStrength;
+                }
+                if (req.body.bonusDexterity || req.body.bonusDexterity === 0) {
+                    character.bonusDexterity = req.body.bonusDexterity;
+                }
+                if (req.body.bonusConstitution || req.body.bonusConstitution === 0) {
+                    character.bonusConstitution = req.body.bonusConstitution;
+                }
+                if (req.body.bonusIntelligence || req.body.bonusIntelligence === 0) {
+                    character.bonusIntelligence = req.body.bonusIntelligence;
+                }
+                if (req.body.experience) {
+                    character.experience = req.body.experience;
+                }
+                if (req.body.gold) {
+                    character.gold = req.body.gold;
                 }
                 if (req.body.head) {
                     character.head = req.body.head;
+                } else if (req.body.head == 0) {
+                    character.head = null
                 }
-                if (req.body.chest){
+                if (req.body.chest) {
                     character.chest = req.body.chest;
+                } else if (req.body.chest == 0) {
+                    character.chest = null
                 }
                 if (req.body.legs) {
                     character.legs = req.body.legs;
+                } else if (req.body.legs == 0) {
+                    character.legs = null
                 }
                 if (req.body.boots) {
                     character.boots = req.body.boots;
+                } else if (req.body.boots == 0) {
+                    character.boots = null
                 }
                 if (req.body.mainhand) {
                     character.mainhand = req.body.mainhand;
+                } else if (req.body.mainhand == 0) {
+                    character.mainhand = null
                 }
                 if (req.body.offhand) {
                     character.offhand = req.body.offhand;
+                } else if (req.body.offhand == 0) {
+                    character.offhand = null
                 }
                 if (req.body.ring) {
                     character.ring = req.body.ring;
+                } else if (req.body.ring == 0) {
+                    character.ring = null
                 }
                 if (req.body.amulet) {
                     character.amulet = req.body.amulet;
+                } else if (req.body.amulet == 0) {
+                    character.amulet = null
                 }
 
                 // save the user
                 character.save(function (err) {
-                    if (err) res.send(err);
+                    if (err) {
+                        res.send(err);
+                    }
 
                     // return a message
                     res.json({
                         message: 'Character updated!'
                     });
                 });
-            })
-        });    
-
+            });
+        });   
+    
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////************ITEMS*************//////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -365,6 +439,7 @@ module.exports = function (app, express) {
             item.name = req.body.name; // set the item's name (comes from the request)
             item.type = req.body.type; // set the item's type (comes from the request)
             item.description = req.body.description; // set the item's description (comes from the request)
+            item.sellPrice = req.body.sellPrice; // set the item's sell price (comes from the request)
             item.slot = req.body.slot; // set the item's slot (comes from the request)
             item.constitution = req.body.constitution; // set the item's constitution bonus (comes from the request)
             item.strength = req.body.strength; // set the item's strength bonus (comes from the request)
@@ -373,7 +448,6 @@ module.exports = function (app, express) {
             item.health = req.body.health; // set the item's health bounus (comes from the request)
 
             item.save(function (err) {
-                console.log(err);
                 if (err) {
                     // duplicate entry
                     if (err.code == 11000) {
@@ -437,6 +511,9 @@ module.exports = function (app, express) {
                 }
                 if (req.body.description) {
                     item.description = req.body.description;
+                }
+                if (req.body.sellPrice) {
+                    item.sellPrice = req.body.sellPrice;
                 }
                 if (req.body.slot) {
                     item.slot = req.body.slot;
@@ -504,7 +581,6 @@ module.exports = function (app, express) {
             creature.difficulty = req.body.difficulty; // set the item's difficulty (comes from the request)
 
             creature.save(function (err) {
-                console.log(err);
                 if (err) {
                     // duplicate entry
                     if (err.code == 11000) {
@@ -637,13 +713,12 @@ module.exports = function (app, express) {
             spell.damage = req.body.damage; // set the spell's damage (comes from the request)
 
             spell.save(function (err) {
-                console.log(err);
                 if (err) {
                     // duplicate entry
                     if (err.code == 11000) {
                         return res.json({
                             success: false,
-                            message: 'An spell with that name already exists. '
+                            message: 'A spell with that name already exists. '
                         });
                     }
                     else {
@@ -696,7 +771,7 @@ module.exports = function (app, express) {
                     res.send(err);
                 }
 
-                // set the new creature information if it exists in the request
+                // set the new spell information if it exists in the request
                 if (req.body.name) {
                     spell.name = req.body.name;
                 }
@@ -724,7 +799,7 @@ module.exports = function (app, express) {
                 if (req.body.intelligence) {
                     spell.intelligence = req.body.intelligence;
                 }
-                if(req.body.health) {
+                if (req.body.health) {
                     spell.health = req.body.health;
                 }
                 if (req.body.health) {
@@ -761,16 +836,528 @@ module.exports = function (app, express) {
             });
         });
 
-    apiRouter.route('/game/inventory:char_id')
+    // on routes that end in /spells/castable
+    // ----------------------------------------------------
+    apiRouter.route('/spells/level/:level')
 
-    apiRouter.route('/game/quest/:char_id')
+        //Get spells castable by a character
+        .get(function (req, res) {
+            Spell.find({
+                level: { $lte : req.params.level }
+            }, function (err, spells) {
+                if (err) {
+                    res.send(err);
+                }
 
+                // return the spells
+                res.json(spells);
+            });
+        }) 
 
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////************NPCS**************//////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
 
+    // on routes that end in /npcs
+    // ----------------------------------------------------
+    apiRouter.route('/npcs')
+        // create an item (accessed at POST http://localhost:8080/npcs)
+        .post(function (req, res) {
 
+            var npc = new Npc(); // create a new instance of the Npc model
+            npc.name = req.body.name; // set the npc's name (comes from the request)
+            npc.shopOwner = req.body.shopOwner; // set whether or not the npc has a shop (comes from the request)
+            npc.shopName = req.body.shopName; // set the npc's shop name (comes from the request)
+            npc.questGiver = req.body.questGiver; // set whether or not the npc is a quest giver (comes from the request)
+            npc.welcome = req.body.welcome; // set the npc's welcome message (comes from the request)
+            npc.thank = req.body.thank //set the npc's thank you message (comes from the request)
+            npc.farewell = req.body.farewell; // set the npc's farewell message  (comes from the request)
 
+            npc.save(function (err) {
+                if (err) {
+                    // duplicate entry
+                    if (err.code == 11000) {
+                        return res.json({
+                            success: false,
+                            message: 'An npc with that name already exists. '
+                        });
+                    }
+                    else {
+                        return res.send(err);
+                    }
+                }
 
-    // api endpoint to get user information
+                // return a message
+                res.json({
+                    message: 'Npc created!'
+                });
+            });
+
+        })
+
+        // get all the npcs (accessed at GET http://localhost:8080/api/npcs)
+        .get(function (req, res) {
+
+            Npc.find({}, function (err, npcs) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return the npcs
+                res.json(npcs);
+            });
+        });
+
+    // on routes that end in /npcs/shopOwners
+    // ----------------------------------------------------
+    apiRouter.route('/npcs/shopOwners')
+        
+        // get all the npcs who are shop owners (accessed at GET http://localhost:8080/api/npcs/shopOwners)
+        .get(function (req, res) {
+
+            // look for an npcs who are shop owners
+            Npc.find({
+                'shopOwner': true
+            }, function (err, npcs) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return the npcs
+                res.json(npcs);
+            });
+        });
+
+    // on routes that end in /npcs/:npc_id
+    // ----------------------------------------------------
+    apiRouter.route('/npcs/:npc_id')
+
+        // get the npc with that id
+        .get(function (req, res) {
+            Npc.findById(req.params.npc_id, function (err, npc) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return that npc
+                res.json(npc);
+            });
+        })
+
+        // update the npc with this id
+        .put(function (req, res) {
+            Npc.findById(req.params.npc_id, function (err, npc) {
+
+                if (err) {
+                    res.send(err);
+                }
+
+                // set the new npc information if it exists in the request
+                if (req.body.name) {
+                    npc.name = req.body.name;
+                }
+                if (req.body.shopOwner) {
+                    npc.shopOwner = req.body.shopOwner;
+                }
+                if (req.body.shopName) {
+                    npc.shopName = req.body.shopName;
+                }
+                if (req.body.questGiver) {
+                    npc.questGiver = req.body.questGiver;
+                }
+                if (req.body.welcome) {
+                    npc.welcome = req.body.welcome;
+                }
+                if (req.body.thank) {
+                    npc.thank = req.body.thank;
+                }
+                if (req.body.farewell) {
+                    npc.farewell = req.body.farewell;
+                }
+
+                // save the npc
+                npc.save(function (err) {
+                    if (err) {
+                        res.send(err);
+                    }
+
+                    // return a message
+                    res.json({
+                        message: 'Npc updated!'
+                    });
+                });
+
+            });
+        })
+
+        // delete the npc with this id
+        .delete(function (req, res) {
+            Npc.remove({
+                _id: req.params.npc_id
+            }, function (err, npc) {
+                if (err) {
+                    res.send(err);
+                }
+
+                res.json({
+                    message: 'Successfully deleted'
+                });
+            });
+        });
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////************SHOPS*************//////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    // on routes that end in /shops
+    // ----------------------------------------------------
+    apiRouter.route('/shops')
+        // create an item (accessed at POST http://localhost:8080/shops)
+        .post(function (req, res) {
+
+            var shop = new Shop(); // create a new instance of the Shop model
+            shop.shopOwner = req.body.shopOwner; // Set the shop owner's name (comes from the request)
+            shop.item = req.body.item; // set the item being added to the shop's stock (comes from the request)
+            shop.price = req.body.price; // set the item's price in the shop (comes from the request)
+
+            shop.save(function (err) {
+                if (err) {
+                    return res.send(err);                 
+                }
+
+                // return a message
+                res.json({
+                    message: 'Item added to shop!'
+                });
+            });
+
+        })
+
+        // get all the shops (accessed at GET http://localhost:8080/api/shops)
+        .get(function (req, res) {
+
+            Shop.find({}, function (err, shops) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return the shops
+                res.json(shops);
+            });
+        });
+
+    // on routes that end in /shops/:shop_owner
+    // ----------------------------------------------------
+    apiRouter.route('/shops/:shop_owner')
+    
+        // get all shop items belonging to a shop owner
+        .get(function (req, res) {
+            Shop.find({
+                shopOwner: req.params.shop_owner
+            }, function (err, shop) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return the shop items
+                res.json(shop);
+            });
+        })       
+
+        // delete the shop item with this id
+        .delete(function (req, res) {
+            Shop.remove({
+                _id: req.params.shop_owner
+            }, function (err, npc) {
+                if (err) {
+                    res.send(err);
+                }
+            });
+        });
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////*************INVENTORY*************////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    // on routes that end in /inventory/add
+    // ----------------------------------------------------
+    apiRouter.route('/inventory/add')
+        //Add an item to inventory (accessed at POST http://localhost:8080/inventory)
+        .put(function (req, res) {
+
+            var inventory = new Inventory(); // create a new instance of the Inventory model
+            inventory.characterID = req.body.characterID; // Set the character ID for the inventory item (comes from the request)
+            inventory.itemID = req.body.itemID; // Set the item ID for the inventory item (comes from the request)
+            inventory.quantity = req.body.quantity;
+            
+            inventory.save(function (err) {
+                if (err) {
+                    if (err.code == 11000) {
+                        Inventory.findOneAndUpdate(
+                            {
+                                characterID: req.body.characterID,
+                                itemID: req.body.itemID
+                            },
+                            {
+                                $inc: {
+                                    quantity: 1
+                                }
+                            },
+                            function (err, items) {
+
+                                // set the new npc information if it exists in the request
+                                if (req.body.characterID) {
+                                    inventory.characterID = req.body.characterID;
+                                }
+                                if (req.body.itemID) {
+                                    inventory.itemID = req.body.itemID;
+                                }
+
+                                // save the inventory
+                                inventory.save(function (err) {
+                                    if (err) {
+                                        res.send(err);
+                                    }
+                                });
+                            });
+                    }
+                }
+                
+            });
+        });
+
+    // on routes that end in /inventory/remove
+    // ----------------------------------------------------
+    apiRouter.route('/inventory/remove')
+        //Remove an item from inventory (accessed at POST http://localhost:8080/inventory)
+        .put(function (req, res) {
+            Inventory.findOne(
+                {
+                    characterID: req.body.characterID,
+                    itemID: req.body.itemID
+                }, function (err, inventory) {
+                    // set the new npc information if it exists in the request
+                    if (req.body.characterID) {
+                        inventory.characterID = req.body.characterID;
+                    }
+
+                    if (req.body.itemID) {
+                        inventory.itemID = req.body.itemID;
+                    }
+
+                    if (req.body.quantity) {
+                        inventory.quantity = req.body.quantity;
+                    }
+
+                    // save the inventory
+                    inventory.save(function (err) {
+                        if (err) {
+                            res.send(err);
+                        }
+                    });
+                });
+
+        });
+
+    // on routes that end in /inventory/:char_id
+    // ----------------------------------------------------
+    apiRouter.route('/inventory/:char_id')
+
+        //// get all inventory items belonging to a character        
+        .get(function (req, res) {
+
+            Inventory.find({
+                characterID: req.params.char_id
+            }, function (err, inventories) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return the inventory items
+                res.json(inventories);
+            });
+        });      
+
+    // on routes that end in /inventory/
+    apiRouter.route('/inventory/:char_id/:item_id')
+
+        // delete the inventory item with this id
+        .delete(function (req, res) {
+            Inventory.findOne(
+                {
+                    characterID: req.params.char_id,
+                    itemID: req.params.item_id
+                }, function (err, inventory) {
+
+                    // save the inventory
+                    inventory.remove(function (err) {
+                        if (err) {
+                            res.send(err);
+                        }
+                    });
+                });
+
+        });
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////*************EXPERIENCE************////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    apiRouter.route('/level/:level')
+
+        .get(function (req, res) {
+            Level.find({
+                level: req.params.level
+            }, function (err, level) {
+                if (err) {
+                    res.send(err);
+                }
+
+                res.json(level);
+            });
+        });
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////*********ENCOUNTERS***********//////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    // on routes that end in /encounters
+    // ----------------------------------------------------
+    apiRouter.route('/encounters')
+        // create an item (accessed at POST http://localhost:8080/encounters)
+        .post(function (req, res) {
+
+            var encounter = new Encounter(); // create a new instance of the Item model
+            encounter.firstCreature = req.body.firstCreature; // set the encounter's first creature (comes from the request)
+            encounter.secondCreature = req.body.secondCreature; // set the encounter's second creature (comes from the request)
+            encounter.thirdCreature = req.body.thirdCreature; // set the encounter's third creature (comes from the request)
+            encounter.experience = req.body.experience; // set the encounter's experience reward (comes from the request)
+            encounter.minimumLevel = req.body.minimumLevel; // set the encounter's minimum level (comes from the request)
+            encounter.maximumLevel = req.body.maximumLevel; // set the encounter's maximum level (comes from the request)
+
+            encounter.save(function (err) {
+                if (err) {
+                    // duplicate entry
+                    if (err.code == 11000) {
+                        return res.json({
+                            success: false,
+                            message: 'An encounter with that name already exists. '
+                        });
+                    }
+                    else {
+                        return res.send(err);
+                    }
+                }
+
+                // return a message
+                res.json({
+                    message: 'Encounter created!'
+                });
+            });
+
+        })
+
+        // get all the encounters (accessed at GET http://localhost:8080/api/encounters)
+        .get(function (req, res) {
+
+            Encounter.find({}, function (err, encounters) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return the items
+                res.json(encounters);
+            });
+        });
+
+    // on routes that end in /encounters/:encounter_id
+    // ----------------------------------------------------
+    apiRouter.route('/encounters/:encounter_id')
+
+        // get the item with that id
+        .get(function (req, res) {
+            Encounter.findById(req.params.encounter_id, function (err, encounter) {
+                if (err) res.send(err);
+
+                // return that item
+                res.json(encounter);
+            });
+        })
+
+        // update the encounter with this id
+        .put(function (req, res) {
+            Encounter.findById(req.params.encounter_id, function (err, encounter) {
+
+                if (err) {
+                    res.send(err);
+                }
+
+                // set the new item information if it exists in the request
+                if (req.body.firstCreature) {
+                    encounter.firstCreature = req.body.firstCreature;
+                }
+                if (req.body.secondCreature) {
+                    encounter.secondCreature = req.body.secondCreature;
+                }
+                if (req.body.thirdCreature) {
+                    encounter.thirdCreature = req.body.thirdCreature;
+                }
+                if (req.body.experience) {
+                    encounter.experience = req.body.experience;
+                }
+                if (req.body.minimumLevel) {
+                    encounter.minimumLevel = req.body.minimumLevel;
+                }
+                if (req.body.maximumLevel) {
+                    encounter.maximumLevel = req.body.maximumLevel;
+                }
+
+                // save the encounter
+                encounter.save(function (err) {
+                    if (err) res.send(err);
+
+                    // return a message
+                    res.json({
+                        message: 'Encounter updated!'
+                    });
+                });
+
+            });
+        })
+
+        // delete the encounter with this id
+        .delete(function (req, res) {
+            Encounter.remove({
+                _id: req.params.encounter_id
+            }, function (err, encounter) {
+                if (err) res.send(err);
+
+                res.json({
+                    message: 'Successfully deleted'
+                });
+            });
+        });
+
+    // on routes that end in /spells/castable
+    // ----------------------------------------------------
+    apiRouter.route('/encounters/level/:level')
+
+        //Get encounters suitable for the character based on level
+        .get(function(req, res) {
+            Encounter.find({
+                minimumLevel: { $lte: req.params.level },
+                maximumLevel: { $gte: req.params.level }
+            }, function(err, encounters) {
+                if (err) {
+                    res.send(err);
+                }
+
+                // return the encounters
+                res.json(encounters);
+            });
+        }) 
+
+    // api endpoint to get user inform
     apiRouter.get('/me', function (req, res) {
         res.send(req.decoded);
     });

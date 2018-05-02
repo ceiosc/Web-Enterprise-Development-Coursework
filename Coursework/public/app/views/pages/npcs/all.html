@@ -1,0 +1,46 @@
+<div class="page-header">
+    <h1>
+        Npcs
+        <a href="/npcs/create" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus"></span>
+            New Npc
+        </a>
+        <!--<a href="#" ng-click="user.deleteNpc(npc._id)" class="btn btn-primary">Delete</a>-->
+    </h1>
+</div>
+<!-- LOADING MESSAGE -->
+<div class="jumbotron text-center" ng-show="npc.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading Npcs...</p>
+</div>
+<table class="table table-bordered table-striped" ng-show="npc.npcs">
+    <thead>
+        <tr>
+            <th>_id</th>
+            <th>Npc Name</th>
+            <th>Shop Owner</th>
+            <th>Shop Name</th>
+            <th>Quest Giver</th>
+            <th>Welcome Message</th>
+            <th>Thank Message</th>
+            <th>Farewell Message</th>
+            <th class="col-sm-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- LOOP OVER THE NPCS -->
+        <tr ng-repeat="person in npc.npcs">
+            <td>{{ person._id }}</td>
+            <td>{{ person.name }}</td>
+            <td>{{ person.shopOwner }}</td>
+            <td>{{ person.shopName }}</td>
+            <td>{{ person.questGiver }}</td>
+            <td>{{ person.welcome }}</td>
+            <td>{{ person.thank }}</td>
+            <td>{{ person.farewell }}</td>
+            <td class="col-sm-1">
+                <a ng-href="/npcs/{{ person._id }}" class="btn btn-danger">Edit</a>
+            </td>
+        </tr>
+    </tbody>
+</table> 

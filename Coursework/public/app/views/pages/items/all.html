@@ -20,30 +20,32 @@
             <th>Name</th>
             <th>Type</th>
             <th>Description</th>
+            <th>Sell Price</th>
             <th>Slot</th>
             <th>Constitution Bonus</th>
             <th>Strength Bonus</th>
             <th>Dexterity Bonus</th>
             <th>Intelligence Bonus</th>
             <th>Health Restore</th>
-            <th class="col-sm-2"></th>
+            <th class="col-sm-1"></th>
         </tr>
     </thead>
     <tbody>
         <!-- LOOP OVER THE ITEMS -->
-        <tr ng-repeat="item in item.items">
-            <td>{{ item._id }}</td>
-            <td>{{ item.name }}</td>
-            <td>{{ item.type }}</td>
-            <td>{{ item.description }}</td>
-            <td>{{ item.slot }}</td>
-            <td>{{ item.constitution }}</td>
-            <td>{{ item.strength }}</td>
-            <td>{{ item.dexterity }}</td>
-            <td>{{ item.intelligence }}</td>
-            <td>{{ item.health }}</td>
-            <td class="col-sm-2">
-                <a ng-href="/items/{{ item._id }}" class="btn btn-danger">Edit</a>
+        <tr ng-repeat="object in item.items">
+            <td>{{ object._id }}</td>
+            <td>{{ object.name }}</td>
+            <td>{{ object.type }}</td>
+            <td>{{ object.description }}</td>
+            <td>{{ object.sellPrice }}</td>
+            <td>{{ object.slot }}</td>
+            <td>{{ object.constitution }}</td>
+            <td>{{ object.strength }}</td>
+            <td>{{ object.dexterity }}</td>
+            <td>{{ object.intelligence }}</td>
+            <td>{{ object.health }}</td>
+            <td class="col-sm-1">
+                <a ng-href="/items/{{ object._id }}" class="btn btn-danger">Edit</a>
             </td>
         </tr>
     </tbody>

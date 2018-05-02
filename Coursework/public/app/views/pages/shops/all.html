@@ -1,0 +1,40 @@
+<div class="page-header">
+    <h1>
+        Shops
+        <a href="/shops/create" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus"></span>
+            Add Item to Stock
+        </a>
+        <!---->
+    </h1>
+</div>
+<!-- LOADING MESSAGE -->
+<div class="jumbotron text-center" ng-show="shop.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading shops...</p>
+</div>
+<table class="table table-bordered table-striped" ng-show="shop.shops">
+    <thead>
+        <tr>
+            <th>Shop ID</th>
+            <th>Shop Owner</th>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th class="col-sm-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- LOOP OVER THE ITEMS -->
+        <tr ng-repeat="item in shop.shops | orderBy: 'shopOwner'">
+            <td>{{ item.shopID }}</td>
+            <td>{{ item.shopOwner}}</td>
+            <td>{{ item.item}}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.description }}</td>
+            <td>
+                <a class="btn btn-primary" ng-click="shop.deleteItem(item.shopID)" >Delete</a>
+            </td>
+        </tr>
+    </tbody>
+</table> 

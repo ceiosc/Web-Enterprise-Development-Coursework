@@ -1,0 +1,47 @@
+<div class="page-header" ng-init="encounter.setupEncounters()">
+    <h1>
+        Encounters
+        <a href="/encounters/create" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus"></span>
+            New Encounter
+        </a>
+    </h1>
+</div>
+<!-- LOADING MESSAGE -->
+<div class="jumbotron text-center" ng-show="encounters.processing">
+    <span class="glyphicon glyphicon-repeat spinner"></span>
+    <p>Loading Items...</p>
+</div>
+<table class="table table-bordered table-striped" ng-show="encounter.encounters">
+    <thead>
+        <tr>
+            <th>Encounter ID</th>
+            <th>First Creature</th>
+            <th>Second Creature</th>
+            <th>Third Creature</th>
+            <th>Experience</th>
+            <th>Minimum Level</th>
+            <th>Maximum Level</th>
+            <th class="col-sm-1"></th>
+            <th class="col-sm-1"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- LOOP OVER THE ITEMS -->
+        <tr ng-repeat="object in encounter.encounters">
+            <td>{{ object.id }}</td>
+            <td>{{ object.firstCreature.name }}</td>
+            <td>{{ object.secondCreature.name }}</td>
+            <td>{{ object.thirdCreature.name }}</td>
+            <td>{{ object.experience }}</td>
+            <td>{{ object.minimumLevel }}</td>
+            <td>{{ object.maximumLevel }}</td>
+            <td class="col-sm-1">
+                <a ng-href="/encounters/{{ object.id }}" class="btn btn-danger">Edit</a>
+            </td>
+            <td>
+                <a class="btn btn-warning" ng-click="shop.deleteEncounter(object.id)">Delete</a>
+            </td>
+        </tr>
+    </tbody>
+</table> 

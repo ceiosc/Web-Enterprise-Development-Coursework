@@ -9,6 +9,9 @@ var morgan = require('morgan'); // used to see requests
 var mongoose = require('mongoose');
 var config = require('./config');
 var path = require('path');
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server);
+var nicknames = [];
 
 // APP CONFIGURATION ==================
 // ====================================
@@ -52,5 +55,39 @@ app.get('*', function(req, res) {
 
 // START THE SERVER
 // ====================================
-app.listen(config.port);
+//app.listen(config.port);
+server.listen(8080);
+
 console.log('Magic happens on port ' + config.port);
+
+io.sockets.on('connection', function (socket) {
+
+    socket.on('new user', function (data, callback) {
+        if (nicknames.indexOf(data) != -1) {
+            callback(false);
+        } else {
+            callback(true);
+            socket.nickname = data;
+            nicknames.push(socket.nickname);
+            io.sockets.emit('usernames', nicknames);
+        }
+    });
+
+    socket.on('send message', function (data, color) {
+        io.sockets.emit('new message', { msg: data, nick: socket.nickname, color: color });
+    });
+
+    socket.on('disconnect', function (data) {
+        if (!socket.nickname) {
+            return;
+        }
+        nicknames.splice(nicknames.indexOf(socket.nickname), 1);
+        io.sockets.emit('usernames', nicknames);
+    });
+
+    socket.on('forceDisconnect', function () {
+        socket.disconnect();
+        nicknames.splice(nicknames.indexOf(socket.nickname), 1);
+        io.sockets.emit('usernames', nicknames);
+    });
+})

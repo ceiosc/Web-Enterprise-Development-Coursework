@@ -28,31 +28,31 @@
             <th>Intelligence Bonus</th>
             <th>Health Restore</th>
             <th>Spell Damage</th>
-            <th class="col-sm-2"></th>
-            <th class="col-sm-2"></th>
+            <th class="col-sm-1"></th>
+            <!--<th class="col-sm-1"></th>-->
         </tr>
     </thead>
     <tbody>
-        <!-- LOOP OVER THE ITEMS -->
-        <tr ng-repeat="spell in spell.spells">
-            <td>{{ spell._id }}</td>
-            <td>{{ spell.name }}</td>
-            <td>{{ spell.type }}</td>
-            <td>{{ spell.cost }}</td>
-            <td>{{ spell.level }}</td>
-            <td>{{ spell.description }}</td>
-            <td>{{ spell.constitution }}</td>
-            <td>{{ spell.strength }}</td>
-            <td>{{ spell.dexterity }}</td>
-            <td>{{ spell.intelligence }}</td>
-            <td>{{ spell.health }}</td>
-            <td>{{ spell.damage }}</td>
-            <td class="col-sm-2">
-                <a ng-href="/spells/{{ spell._id }}" class="btn btn-danger">Edit</a>
+        <!-- LOOP OVER THE SPELLS -->
+        <tr ng-repeat="magic in spell.spells">
+            <td>{{ magic._id }}</td>
+            <td>{{ magic.name }}</td>
+            <td>{{ magic.type }}</td>
+            <td>{{ magic.cost }}</td>
+            <td>{{ magic.level }}</td>
+            <td>{{ magic.description }}</td>
+            <td>{{ magic.constitution }}</td>
+            <td>{{ magic.strength }}</td>
+            <td>{{ magic.dexterity }}</td>
+            <td>{{ magic.intelligence }}</td>
+            <td>{{ magic.health }}</td>
+            <td>{{ magic.damage }}</td>
+            <td class="col-sm-1">
+                <a ng-href="/spells/{{ magic._id }}" class="btn btn-danger">Edit</a>
             </td>
-            <td>
+            <!--<td class="col-sm-1">
                 <a href="#" ng-click="spell.deleteSpell(spell._id)" class="btn btn-primary">Delete</a>
-            </td>
+            </td>-->
         </tr>
     </tbody>
 </table> 

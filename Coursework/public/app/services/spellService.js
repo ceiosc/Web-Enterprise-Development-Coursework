@@ -14,6 +14,11 @@ angular.module('spellService', [])
             return $http.get('/api/spells/');
         };
 
+        // get all spells castable given intelligence level
+        spellFactory.getSpells = function (level) {
+            return $http.get('/api/spells/level/' + level);
+        };
+
         // create an spell
         spellFactory.create = function (spellData) {
             return $http.post('/api/spells/', spellData);

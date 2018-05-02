@@ -16,25 +16,60 @@ var CharacterSchema = new Schema({
         required: true,
         default: 1
     },
-    constitution: {
+    levelUpPoints: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    baseConstitution: {
         type: Number,
         required: true,
         default: 1
     },
-    strength: {
+    baseStrength: {
         type: Number,
         required: true,
         default: 1
     },
-    dexterity: {
+    baseDexterity: {
         type: Number,
         required: true,
         default: 1
     },
-    intelligence: {
+    baseIntelligence: {
         type: Number,
         required: true,
         default: 1
+    },
+    bonusConstitution: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    bonusStrength: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    bonusDexterity: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    bonusIntelligence: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    gold: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    experience: {
+        type: Number,
+        required: true,
+        default: 0
     },
     head: {
         type: mongoose.Schema.Types.ObjectId,

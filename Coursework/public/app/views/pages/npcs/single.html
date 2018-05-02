@@ -1,0 +1,67 @@
+<div class="page-header">
+    <h1 ng-if="npc.type == 'create'">Create Npc</h1>
+    <h1 ng-if="npc.type == 'edit'">Edit Npc</h1>
+</div>
+<form class="form-horizontal" ng-submit="npc.saveNpc()">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" ng-model="npc.npcData.name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Shop Owner</label>
+        <select class="col-sm-4 form-control" style="margin-left: 15px; width: 29%;" ng-model="npc.npcData.shopOwner">
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
+    </div>
+    <div class="form-group" ng-if="npc.npcData.shopOwner.toString() == 'true'">
+        <label class="col-sm-2 control-label">Shop Name</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" ng-model="npc.npcData.shopName">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Quest Giver</label>
+        <select class="col-sm-4 form-control" style="margin-left: 15px; width: 29%;" ng-model="npc.npcData.questGiver">
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Welcome Message</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" ng-model="npc.npcData.welcome">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Thank Message</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" ng-model="npc.npcData.thank">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Farewell Message</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" ng-model="npc.npcData.farewell">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-6">
+            <button type="submit" class="btn btn-success btn-lg btn-block" ng-if="npc.type == 'create'">
+                Create Npc
+            </button>
+            <button type="submit" class="btn btn-success btn-lg btn-block" ng-if="npc.type == 'edit'">
+                Update Npc
+            </button>
+        </div>
+    </div>
+</form>
+<div class="row show-hide-message" ng-show="npc.message">
+    <div class="col-sm-6 col-sm-offset-2">
+        <div class="alert alert-info">
+            {{ npc.message }}
+        </div>
+    </div>
+</div>
